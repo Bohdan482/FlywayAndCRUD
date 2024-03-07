@@ -1,12 +1,10 @@
-package org.example.Controller;
-
-import org.example.ClientDAO.Client;
+package org.example.ClientDAO;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface ClientController {
+public interface ClientDAO {
     long create(String name);
     String getById(long id);
     void setName(long id, String name);

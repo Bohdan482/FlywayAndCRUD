@@ -1,13 +1,12 @@
 package org.example.ClientDAO;
 
-import org.example.Controller.ClientController;
 import org.example.Storage.Storage;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientService implements ClientController {
+public class ClientService implements ClientDAO {
     private final Connection connection = Storage.getInstance().getConnection();
     private static final String NAMEEXCEPTIONMESSAGE =
             "Кількість знаків імені не може дорівнювати нулю, має перевищувати 2 та бути не більше за 1000";
@@ -20,27 +19,21 @@ public class ClientService implements ClientController {
 
         long id = 0L;
         String createClientSql = "INSERT INTO client (name) values (?)";
-        String maxIdSql = "SELECT max(id) FROM client";
 
         try{
-            ps = connection.prepareStatement(createClientSql);
+            ps = connection.prepareStatement(createClientSql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, name);
             if (name.length()<3 || name.length()>1000) {
                 throw e;
             } else ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            while (rs.next()){
+                id = rs.getLong("id");
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }finally {
             closePreparedStatement(ps);
-        }
-
-        try(Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(maxIdSql);
-            while (resultSet.next()) {
-                id = resultSet.getLong(1);
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         }
         return id;
     }
